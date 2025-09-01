@@ -9,7 +9,7 @@ class ComposerStaticInit1cf3f2ba6a9661b6685dac66ca4ceb61
     public static $prefixLengthsPsr4 = array (
         'S' => 
         array (
-            'Scottboms\\Log\\' => 14,
+            'Scottboms\\Logger\\' => 17,
         ),
         'K' => 
         array (
@@ -18,7 +18,7 @@ class ComposerStaticInit1cf3f2ba6a9661b6685dac66ca4ceb61
     );
 
     public static $prefixDirsPsr4 = array (
-        'Scottboms\\Log\\' => 
+        'Scottboms\\Logger\\' => 
         array (
             0 => __DIR__ . '/../..' . '/classes',
         ),
@@ -34,6 +34,7 @@ class ComposerStaticInit1cf3f2ba6a9661b6685dac66ca4ceb61
         'Kirby\\ComposerInstaller\\Installer' => __DIR__ . '/..' . '/getkirby/composer-installer/src/ComposerInstaller/Installer.php',
         'Kirby\\ComposerInstaller\\Plugin' => __DIR__ . '/..' . '/getkirby/composer-installer/src/ComposerInstaller/Plugin.php',
         'Kirby\\ComposerInstaller\\PluginInstaller' => __DIR__ . '/..' . '/getkirby/composer-installer/src/ComposerInstaller/PluginInstaller.php',
+        'Scottboms\\Logger\\Log' => __DIR__ . '/../..' . '/classes/Log.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

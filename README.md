@@ -47,10 +47,12 @@ return [
 
 ## Usage
 
-The logger expects 3 string values -- the first is a `platform` keyword such as 'site', 'template', etc. The second is a `level` keyword (e.g. info, log, warn, error, success). The third is the message to log which can either be a string -- or can be arbitrary data from Kirby that can be converted to string values.
+The logger is configured as a `siteMethod` and expects 3 string values -- the first is a `platform` keyword such as 'site', 'template', etc. The second is a `level` keyword (e.g. info, log, warn, error, success). The third is the message to log which can either be a string -- or can be arbitrary data from Kirby that can be converted to string values.
 
 ```php
-<?php kirby->log('site', 'info', 'This is the message to log.') ?>
+<?php
+  site()->log('site', 'info', 'This is the message to log.');
+?>
 ```
 
 ## Compatibility

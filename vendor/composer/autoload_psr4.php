@@ -6,6 +6,6 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Scottboms\\Log\\' => array($baseDir . '/classes'),
+    'Scottboms\\Logger\\' => array($baseDir . '/classes'),
     'Kirby\\' => array($vendorDir . '/getkirby/composer-installer/src'),
 );

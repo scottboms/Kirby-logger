@@ -40,6 +40,7 @@ class Log
 
 		$timestamp = date('Y-m-d H:i:s');
 		$entry     = Str::unhtml("[$timestamp][" . strtoupper($level) . "][$platform] $message") . PHP_EOL;
+
 		F::append($logFile, $entry);
 	}
 
@@ -51,7 +52,7 @@ class Log
 		// delete the oldest log
 		$oldest = $logFile . '.' . $maxFiles;
 		if (F::exists($oldest)) {
-			F::remove($oldest);
+			  F::remove($oldest);
 		}
 
 		// shift the chain backwards

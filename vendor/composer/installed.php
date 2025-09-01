@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'scottboms/logger',
-        'pretty_version' => '1.0.0+no-version-set',
-        'version' => '1.0.0.0',
-        'reference' => null,
+        'pretty_version' => 'dev-main',
+        'version' => 'dev-main',
+        'reference' => '21d80b7d4c68b7d6fc39a3552ac9ca3dd843632a',
         'type' => 'kirby-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -20,9 +20,9 @@
             'dev_requirement' => false,
         ),
         'scottboms/logger' => array(
-            'pretty_version' => '1.0.0+no-version-set',
-            'version' => '1.0.0.0',
-            'reference' => null,
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
+            'reference' => '21d80b7d4c68b7d6fc39a3552ac9ca3dd843632a',
             'type' => 'kirby-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

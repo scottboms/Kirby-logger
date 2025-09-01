@@ -3,18 +3,10 @@
 declare(strict_types=1);
 
 use Kirby\Cms\App;
-use Scottboms\Logger;
+use Kirby\Cms\App as Kirby;
 
-// try composer autoload (works when plugin is installed via composer)
-$composerAutoload = __DIR__ . '/vendor/autoload.php';
-if (is_file($composerAutoload)) {
-  require_once $composerAutoload;
-}
-
-// fallback for zip installs (no vendor/)
-if (!class_exists(\Scottboms\Logger\Log::class, false)) {
-	@include_once __DIR__ . '/classes/Log.php';
-}
+// composer autoload
+@include_once __DIR__ . '/vendor/autoload.php';
 
 // shamelessly borrowed from distantnative/retour-for-kirby
 if (
@@ -25,13 +17,6 @@ if (
 }
 
 Kirby::plugin('scottboms/logger', [
-	'info' => [
-		'homepage' => 'https://github.com/scottboms/kirby-logger',
-		'version'  => '1.0.0',
-		'license'  => 'MIT',
-		'authors'  => [[ 'name' => 'Scott Boms' ]],
-	],
-
 	'options' => [
 		'dir'      => null,          // where to write logs, null => kirby()->root('logs')
 		'filename' => 'logger.log', // log file name
@@ -44,9 +29,17 @@ Kirby::plugin('scottboms/logger', [
 	],
 
 	// convenience method: kirby()->log('apple-music','info','Saved token')
-	'methods' => [
+	'siteMethods' => [
 		'log' => function (string $platform, string $level, string $message): void {
 			\Scottboms\Logger\Log::log($platform, $level, $message);
 		},
 	],
+
+	'info' => [
+		'homepage' => 'https://github.com/scottboms/kirby-logger',
+		'version'  => '1.0.0',
+		'license'  => 'MIT',
+		'authors'  => [[ 'name' => 'Scott Boms' ]],
+	],
+
 ]);
