@@ -1,5 +1,7 @@
 # Logger for Kirby
 
+![Plugin Preview](src/assets/kirby-logger-plugin.jpg)
+
 An easily reusable PHP logger plugin for Kirby. Helpful for debugging front-end templates and back-end code.
 
 ## Installation

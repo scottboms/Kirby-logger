@@ -27,7 +27,7 @@
 						:icon="auto ? 'refresh-stop' : 'refresh-auto'"
 						size="xs"
 						variant="filled"
-						:theme="auto ? 'red-icon' : 'green-icon'"
+						:theme="auto ? 'red' : 'green'"
 						@click="toggleAuto"
 						responsive="true"
 					>{{ auto ? 'Stop' : 'Auto-Refresh' }}</k-button>
@@ -45,7 +45,7 @@
 							@input="val => lines = Number(val)"
 						/>
 
-					<k-button icon="check" size="xs" variant="filled" theme="green-icon" @click="fetchTail" :disabled="loading">Apply</k-button>
+					<k-button icon="check" size="lg" variant="filled" @click="fetchTail" :disabled="loading">Apply</k-button>
 				</k-button-group>
 			</k-section>
 
