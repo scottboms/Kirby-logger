@@ -29,9 +29,9 @@ Optional configuration settings can be used to override plugin defaults.
 
 | Property                         | Default       | Req? | Description                                    |
 |----------------------------------|---------------|------|------------------------------------------------|
-| scottboms.logger.dir             | `null`        | No   | By default writes to kirby's native log        |
+| scottboms.logger.dir             | `null`        | No   | By default writes to kirby's native log folder |
 | scottboms.logger.filename        | `logger.log`  | No   | The saved log filename                         |
-| scottboms.logger.rotate.maxSize  | `1024 x 1024` | No   | The maxSize of log files (default: 1MB)        |
+| scottboms.logger.rotate.maxSize  | `1024*1024`   | No   | The maxSize of log files (default: 1MB)        |
 | scottboms.logger.rotate.maxFiles | `5`           | No   | Rotate up to 5 log files                       |
 
 **Example Use (in config/config.php):**

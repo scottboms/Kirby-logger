@@ -1,12 +1,10 @@
 <?php
 
-declare(strict_types=1);
+load(['Scottboms\Logger\Log' => __DIR__ . '/classes/Log.php']);
 
-use Kirby\Cms\App;
+use Scottboms\Logger\Log;
 use Kirby\Cms\App as Kirby;
-
-// composer autoload
-@include_once __DIR__ . '/vendor/autoload.php';
+use Kirby\Cms\App;
 
 // shamelessly borrowed from distantnative/retour-for-kirby
 if (
@@ -71,8 +69,8 @@ Kirby::plugin('scottboms/logger', [
 	],
 
 	'info' => [
+		'version'  => '1.1.1',
 		'homepage' => 'https://github.com/scottboms/kirby-logger',
-		'version'  => '1.1.0',
 		'license'  => 'MIT',
 		'authors'  => [[ 'name' => 'Scott Boms' ]],
 	],
