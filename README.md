@@ -59,8 +59,7 @@ The logger is configured as a `siteMethod` and expects 3 string values -- the fi
 
 ## Compatibility
 
-* Kirby 4.x
-* Kirby 5.x
+* Kirby 6.x (Plugin version 6.x)
 
 
 ## Disclaimer

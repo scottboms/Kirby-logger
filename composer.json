@@ -19,10 +19,8 @@
     "kirby",
     "kirby-cms",
     "kirby-plugin",
-    "kirby4",
-    "kirby5",
-    "kirby4-plugin",
-    "kirby5-plugin",
+    "kirby6",
+    "kirby6-plugin",
     "debugging",
     "log"
   ],
