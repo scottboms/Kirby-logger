@@ -1,29 +1,45 @@
 <?php
 
+use Kirby\Exception\PermissionException;
+use Kirby\Filesystem\F;
+
 return [
 	[
 		'pattern' => 'logger/tail',
 		'method'  => 'GET',
 		'action'  => function () {
-			// must be logged in to panel
-			if (!$user = kirby()->user()) {
-				throw new Exception('Unauthorized', 401);
+			// Restrict access to administrators
+			$user = kirby()->user();
+
+			if (!$user || !$user->isAdmin()) {
+				throw new \Kirby\Exception\PermissionException(
+					'You are not authorized to view logs.'
+				);
 			}
 
-			$opts     = option('scottboms.logger', []);
-			$dir      = $opts['dir']      ?? kirby()->root('logs');
-			$filename = $opts['filename'] ?? 'logger.log';
+			$options = option('scottboms.logger', []);
+			$dir = $options['dir'] ?? kirby()->root('logs');
+			$filename = $options['filename'] ?? 'logger.log';
+
 			$logFile  = rtrim((string)$dir, '/\\') . DIRECTORY_SEPARATOR . $filename;
 
+			// Validate requested line count
 			$lines = (int)(get('lines') ?? 400);
-			$lines = max(50, min($lines, 2000)); // safe bounds
+			$lines = max(10, min($lines, 2000)); // safe bounds
 
+			// Read the log contents
 			$content = '';
-			if (\Kirby\Filesystem\F::exists($logFile)) {
-				$content = \Kirby\Filesystem\F::read($logFile) ?? '';
-				// tail the last N lines
-				$parts   = explode("\n", $content);
-				$content = implode("\n", array_slice($parts, -$lines));
+
+			if (F::exists($logFile)) {
+				$content = F::read($logFile) ?? '';
+
+				// Remove trailing line breaks before splitting
+				$content = rtrim($content, "\r\n");
+
+				if ($content !== '') {
+					$parts = explode("\n", $content);
+					$content = implode("\n", array_slice($parts, -$lines));
+				}
 			}
 
 			return [

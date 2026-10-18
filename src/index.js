@@ -4,6 +4,6 @@ import { icons } from "./icons.js";
 panel.plugin('scottboms/logger', {
   icons,
 	components: {
-    'k-logger-view': Logger,
+    'k-logger-view': Logger
   }
 });

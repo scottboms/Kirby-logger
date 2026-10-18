@@ -22,50 +22,74 @@ class Log
 		$options   = $kirby->option('scottboms.logger', []);
 		$dir       = $options['dir'] ?? $kirby->root('logs');
 		$filename  = $options['filename'] ?? 'logger.log';
-		$rotate    = $options['rotate']   ?? ['maxSize' => 0, 'maxFiles' => 0];
-		$logFile = rtrim((string)$dir, '/\\') . DIRECTORY_SEPARATOR . $filename;
-
-		// ensure directory exists
-		Dir::make($dir);
+		$rotate    = $options['rotate'] ?? ['maxSize' => 0, 'maxFiles' => 0];
 
 		// rotate if needed
-		$maxSize  = (int)($rotate['maxSize']  ?? 0);
+		$maxSize = (int)($rotate['maxSize'] ?? 0);
 		$maxFiles = (int)($rotate['maxFiles'] ?? 0);
 
-		if ($maxSize > 0 && $maxFiles > 0 && F::exists($logFile) && F::size($logFile) >= $maxSize) {
-			self::rotate($logFile, $maxFiles);
+		// Ensure the directory exists
+		Dir::make($dir);
+
+		$logFile = rtrim((string)$dir, '/\\') . DIRECTORY_SEPARATOR . $filename;
+
+		// Build the log entry
+		$timestamp = date('Y-m-d H:i:s');
+
+		$entry = Str::unhtml(
+			"[$timestamp][" .
+			strtoupper($level) .
+			"][$platform] $message"
+		) . PHP_EOL;
+
+		// Rotate before writing if the next entry exceeds the limit
+		if (
+			$maxSize > 0 &&
+			$maxFiles > 0 &&
+			F::exists($logFile)
+		) {
+			$currentSize = F::size($logFile);
+			if ($currentSize + strlen($entry) > $maxSize) {
+				self::rotate($logFile, $maxFiles);
+			}
 		}
 
-		$timestamp = date('Y-m-d H:i:s');
-		$entry     = Str::unhtml("[$timestamp][" . strtoupper($level) . "][$platform] $message") . PHP_EOL;
-
+		// Append the new entry
 		F::append($logFile, $entry);
 	}
 
 	/**
-	 * simple N-file rotation: file -> file.1, file.1 -> file.2, ..., deletes file.N
+	 * Rotate log files:
+	 *
+	 * logger.log   -> logger.log.1
+	 * logger.log.1 -> logger.log.2
+	 * ...
 	 */
-	private static function rotate(string $logFile, int $maxFiles): void
-	{
-		// delete the oldest log
+
+	private static function rotate(
+		string $logFile,
+		int $maxFiles
+	): void {
+		// Remove the oldest file
 		$oldest = $logFile . '.' . $maxFiles;
+
 		if (F::exists($oldest)) {
-			  F::remove($oldest);
+			F::remove($oldest);
 		}
 
-		// shift the chain backwards
+		// Shift existing rotated files
 		for ($i = $maxFiles - 1; $i >= 1; $i--) {
-			$src = $logFile . '.' . $i;
-			$dst = $logFile . '.' . ($i + 1);
-			if (F::exists($src)) {
-				F::move($src, $dst, true);
+			$source = $logFile . '.' . $i;
+			$destination = $logFile . '.' . ($i + 1);
+
+			if (F::exists($source)) {
+				F::move($source, $destination, true);
 			}
 		}
 
-		// current -> .1
+		// Move the current log to .1
 		if (F::exists($logFile)) {
 			F::move($logFile, $logFile . '.1', true);
 		}
 	}
-
 }

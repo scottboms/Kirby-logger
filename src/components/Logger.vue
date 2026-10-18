@@ -1,163 +1,252 @@
 <template>
-	<k-panel-inside>
-		<k-view class="k-logger">
-			<k-header class="k-site-view-header">
-        Log Viewer
-        <k-button-group slot="buttons">
-					<k-button
-						icon="copy"
-						size="xs"
-						variant="filled"
-						theme="blue-icon"
-						style="margin-left: .5rem"
-						@click="copy"
-						:disabled="loading || !content"
-					>Copy</k-button>
+  <k-panel-inside>
+    <k-view class="k-logger">
+      <k-header class="k-site-view-header">
+        {{ title || "Log Viewer" }}
 
-					<k-button
-						icon="refresh"
-						size="xs"
-						variant="filled"
-						@click="fetchTail"
-						:disabled="loading"
-						responsive="true"
-					>Refresh</k-button>
+        <template #buttons>
+          <k-button-group>
 
-					<k-button
-						:icon="auto ? 'refresh-stop' : 'refresh-auto'"
-						size="xs"
-						variant="filled"
-						:theme="auto ? 'red' : 'green'"
-						@click="toggleAuto"
-						responsive="true"
-					>{{ auto ? 'Stop' : 'Auto-Refresh' }}</k-button>
-				</k-button-group>
-			</k-header>
+          <k-button
+            icon="copy"
+            size="xs"
+            variant="filled"
+            theme="blue-icon"
+            :disabled="loading || !content"
+            @click="copy"
+          >Copy</k-button>
 
-			<k-section label="Log" style="margin-bottom: 1rem">
-				<k-button-group slot="options">
-						<k-number-field
-							:value="lines"
-							:min="10"
-							:max="2000"
-							after="Lines"
-							width="1/3"
-							@input="val => lines = Number(val)"
-						/>
+          <k-button
+            icon="refresh"
+            size="xs"
+            variant="filled"
+            :disabled="loading"
+            responsive="true"
+            @click="fetchTail"
+          >Refresh</k-button>
 
-					<k-button icon="check" size="lg" variant="filled" @click="fetchTail" :disabled="loading">Apply</k-button>
-				</k-button-group>
-			</k-section>
+          <k-button
+            :icon="auto ? 'refresh-stop' : 'refresh-auto'"
+            size="xs"
+            variant="filled"
+            :theme="auto ? 'red' : 'green'"
+            responsive="true"
+            @click="toggleAuto"
+          >{{ auto ? 'Stop' : 'Auto-Refresh' }}</k-button>
+          </k-button-group>
+        </template>
+      </k-header>
 
-			<k-box theme="passive">
-				<div style="font-family: var(--font-mono); font-size: var(--text-md); line-height: var(--height-md); max-height: calc(100vh - 360px); overflow: auto; white-space: pre; width: 100%;">
-					<template v-if="loading">Loading...</template>
-					<template v-else-if="content">{{ content }}</template>
-					<template v-else>No log content</template>
-				</div>
-			</k-box>
+      <k-section :label="filename || 'Log File'" class="k-logger-section">
+        <template #options>
+          <k-button-group>
+            <k-number-field
+              :value="lines"
+              :min="10"
+              :max="2000"
+              after="Lines"
+              @input="updateLines"
+            />
 
-		</k-view>
-	</k-panel-inside>
+            <k-button
+              icon="check"
+              size="lg"
+              variant="filled"
+              :disabled="loading"
+              @click="fetchTail"
+            >Apply</k-button>
+          </k-button-group>
+        </template>
+      </k-section>
+
+			<k-box theme="passive" class="k-logger-box">
+        <div
+          class="k-logger-content"
+          role="log"
+          aria-label="Log file contents"
+        >
+          <template v-if="loading && !content">
+            Loading…
+          </template>
+
+          <template v-else-if="content">
+            {{ content }}
+          </template>
+
+          <template v-else>
+            No log content
+          </template>
+        </div>
+      </k-box>
+    </k-view>
+  </k-panel-inside>
 </template>
 
 <script>
 export default {
 	name: 'Logger',
 	props: {
-		title: String,
-		tailEndpoint: String, // e.g. /logger/tail (api route)
-		defaultLines: Number,
-		filename: String,
-	},
+		title: {
+      type: String,
+      default: "Log Viewer"
+    },
+		tailEndpoint: {
+      type: String, // e.g. /logger/tail (api route)
+      required: true
+    },
+    defaultLines: {
+      type: Number,
+      default: 400
+    },
+    filename: String
+  },
 
-	data() {
-		return {
-			content: '',
-			lines: this.defaultLines || 400,
-			loading: false,
-			auto: false,
-			timer: null,
-		};
-	},
+  data() {
+    return {
+      content: '',
+      lines: this.defaultLines,
+      loading: false,
+      auto: false,
+      timer: null,
+    };
+  },
 
-	created() {
-		this.fetchTail();
-	},
+  created() {
+    this.fetchTail();
+  },
 
-	beforeDestroy() {
-		if (this.timer) clearInterval(this.timer);
-	},
+  beforeUnmount() {
+    this.stopAuto();
+  },
 
-	methods: {
-		notify(kind, msg) {
-			const api = this.$panel && (this.$panel.notifications || this.$panel.notification);
-			if (api && typeof api[kind] === 'function') {
-				api[kind](msg);
-				return;
-			}
-			console.warn('Notification:', kind, msg); // fallback
-		},
+  methods: {
+    notify(kind, message) {
+      const notifications = this.$panel?.notification;
+      if (typeof notifications?.[kind] === "function") {
+        notifications[kind](message);
+      } else {
+        console.warn("Notification:", kind, message);
+      }
+    },
+    
+    updateLines(value) {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) {
+        this.lines = Math.max(10, Math.min(2000, parsed));
+      }
+    },
+    
+    async fetchTail() {
+      // Prevent overlapping requests
+      if (this.loading) {
+        return;
+      }
+      this.loading = true;
 
-		async fetchTail() {
-			try {
-				this.loading = true;
-				const res = await this.$api.get(this.tailEndpoint, { lines: this.lines });
-				this.content = (res && res.content) ? res.content : '';
-			} catch (e) {
-				this.notify('error', e.message || 'Failed to load log file');
-			} finally {
-				this.loading = false;
-			}
-		},
+      try {
+        const response = await this.$api.get(
+          this.tailEndpoint,
+          { lines: this.lines }
+        );
 
-		toggleAuto() {
-			this.auto = !this.auto;
-			if (this.auto) {
-				this.timer = setInterval(this.fetchTail, 5000);
-			} else if (this.timer) {
-				clearInterval(this.timer);
-				this.timer = null;
-			}
-		},
+        this.content = response?.content ?? "";
+      } catch (error) {
+        this.notify(
+          "error",
+          error?.message || "Failed to load log file"
+        );
+      } finally {
+        this.loading = false;
+      }
+    },
 
-		async copy() {
-			if (!this.content) {
-				this.notify('error', 'Nothing to copy');
-				return;
-			}
+    toggleAuto() {
+      if (this.auto) {
+        this.stopAuto();
+      } else {
+        this.startAuto();
+      }
+    },
 
-			try {
-				// modern clipboard api
-				if (navigator.clipboard && navigator.clipboard.writeText) {
-					await navigator.clipboard.writeText(this.content);
-				}
-				// kirby 5 panel helper, if available
-				else if (this.$panel && typeof this.$panel.copy === 'function') {
-					await this.$panel.copy(this.content);
-				}
-				// legacy helper sometimes present in older setups
-				else if (typeof this.$copy === 'function') {
-					await this.$copy(this.content);
-				}
-				// textarea fallback
-				else {
-					const ta = document.createElement('textarea');
-					ta.value = this.content;
-					ta.setAttribute('readonly', '');
-					ta.style.position = 'fixed';
-					ta.style.top = '-9999px';
-					document.body.appendChild(ta);
-					ta.select();
-					document.execCommand('copy');
-					document.body.removeChild(ta);
-				}
-				this.notify('success', 'Log copied');
-			} catch (e) {
-				this.notify('error', e?.message || 'Copy failed');
-			}
-		}
+    startAuto() {
+      if (this.timer) {
+        return;
+      }
 
-	}
-}
+      this.auto = true;
+
+      this.timer = setInterval(() => {
+        this.fetchTail();
+      }, 5000);
+    },
+
+    stopAuto() {
+      if (this.timer) {
+        clearInterval(this.timer);
+        this.timer = null;
+      }
+
+      this.auto = false;
+    },
+
+    async copy() {
+      if (!this.content) {
+        this.notify("error", "Nothing to copy");
+        return;
+      }
+
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(this.content);
+        } else {
+          const textarea = document.createElement("textarea");
+
+          textarea.value = this.content;
+          textarea.setAttribute("readonly", "");
+          textarea.style.position = "fixed";
+          textarea.style.top = "-9999px";
+
+          document.body.appendChild(textarea);
+          textarea.select();
+
+          const copied = document.execCommand("copy");
+          textarea.remove();
+
+          if (!copied) {
+            throw new Error("Clipboard operation failed");
+          }
+        }
+
+        this.notify("success", "Log copied");
+      } catch (error) {
+        this.notify(
+          "error",
+          error?.message || "Copy failed"
+        );
+      }
+    }
+  }
+};
 </script>
+
+<style scoped>
+.k-logger-section {
+  margin-bottom: 1rem;
+}
+
+.k-logger-box {
+  min-width: 0;
+}
+
+.k-logger-content {
+  width: 100%;
+  min-width: 0;
+  max-height: calc(100vh - 360px);
+  overflow: auto;
+
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  line-height: 1.5;
+  white-space: pre;
+}
+</style>
