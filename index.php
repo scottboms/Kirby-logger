@@ -69,7 +69,7 @@ Kirby::plugin('scottboms/logger', [
 	],
 
 	'info' => [
-		'version'  => '1.1.1',
+		'version'  => '1.1.2',
 		'homepage' => 'https://github.com/scottboms/kirby-logger',
 		'license'  => 'MIT',
 		'authors'  => [[ 'name' => 'Scott Boms' ]],
